@@ -4,7 +4,7 @@ A custom Cultist boss mod for SPT 4.1.6, featuring an original character with a 
 # DEVIL – Cultist Operator
 
 <p align="center">
-  <img src="assets/devil-dossier.png" alt="DEVIL classified military dossier" width="700">
+  <img src="assets/Devil.jpg" alt="DEVIL classified military dossier" width="700">
 </p>
 
 <p align="center">

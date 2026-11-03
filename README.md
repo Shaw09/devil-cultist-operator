@@ -15,9 +15,9 @@ A custom Cultist boss mod for SPT 4.1.6, featuring an original character with a 
 
 ## Overview
 
-**Devil Cultist Operator** is a custom boss mod for Single Player Tarkov (SPT), introducing DEVIL, an original Cultist operator with a military background in the United States Naval Special Warfare community.
+**Devil Cultist Operator** is a custom boss mod for Single Player Tushonka (SPT), introducing DEVIL, an original Cultist operator with a military background in the United States Naval Special Warfare community.
 
-Combining the background of a former special operations operator with the mysterious nature of the Cultists, DEVIL brings a new character and combat presence to Tarkov.
+Combining the background of a former special operations operator with the mysterious nature of the Cultists, DEVIL brings a new character and combat presence to Tushonka.
 
 ## Background – DEVIL
 

@@ -88,6 +88,7 @@ The project uses the following libraries and APIs:
 - **SAIN**
 - **Big Brain**
 - **MoreBotsAPI**
+- **WTT-ContentBackport
 - **WTT-Artem**
 
 Make sure the required dependencies are installed and compatible with your SPT version.

@@ -1,0 +1,21 @@
+{
+  "6ae9c382f729bf328e2c16e2": {
+    "itemTplToClone": "65ca457b4aafb5d7fc0dcb5d",
+    "parentId": "5447e1d04bdc2dff2f8b4567",
+    "handbookParentId": "5b5f7a0886f77409407a7f96",
+    "overrideProperties": {
+      "ExaminedByDefault": false
+    },
+    "locales": {
+      "en": {
+        "name": "Ritual Knife",
+        "shortName": "Ritual",
+        "description": "The blade Devil carries since he abandoned the Navy."
+      }
+    },
+    "fleaPriceRoubles": 50000,
+    "handbookPriceRoubles": 40000,
+    "addtoBots": false,
+    "addtoTraders": false
+  }
+}

@@ -120,9 +120,11 @@ Refer to the release package for the component-specific installation structure.
 ## Credits
 
 - **Shaw** – Project author and developer.
-- **CommonLib** – Shared modding library.
+- **WTT-CommonLib** – Shared modding library.
 - **SAIN** – AI framework.
 - **MoreBotsAPI** – Bot registration and integration API.
+- **WTT-ContentBackport** - Add more items.
+- **WTT-Artem** - Add other items.
 
 ## License
 

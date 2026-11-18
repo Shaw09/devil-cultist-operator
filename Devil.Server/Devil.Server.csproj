@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+	  <AssemblyName>Devil.Server</AssemblyName>
+	  <RootNamespace>Devil.Server</RootNamespace>
+	  <OutputType>Library</OutputType>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Nullable>enable</Nullable>
+	  <Version>1.0.0</Version>
+	  <SPTPath Condition="'$(SPTPath)' == ''">S:\SPT</SPTPath>
+	  <PackageRoot>$(MSBuildProjectDirectory)\..\Build\SPT_Runtime\user\mods\Devil</PackageRoot>
+  </PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="SPTushonka.Common" Version="4.1.3" />
+		<PackageReference Include="SPTushonka.DI" Version="4.1.3" />
+		<PackageReference Include="SPTushonka.Reflection" Version="4.1.3" />
+		<PackageReference Include="SPTushonka.Server.Core" Version="4.1.3" />
+		<PackageReference Include="WTT-ServerCommonLib" Version="3.0.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="MoreBotsServer" Private="false">
+			<HintPath>..\References\MoreBotsServer.dll</HintPath>
+		</Reference>
+		<Reference Include="SAIN.ServerInterop" Private="false">
+			<HintPath>$(SPTPath)\SPT_Runtime\user\mods\Solarint-SAIN-ServerMod\SAIN.ServerInterop.dll</HintPath>
+		</Reference>
+		<Reference Include="SAIN.Preset.Shared" Private="false">
+			<HintPath>$(SPTPath)\SPT_Runtime\user\mods\Solarint-SAIN-ServerMod\SAIN.Preset.Shared.dll</HintPath>
+		</Reference>
+		<Reference Include="SAINServerMod" Private="false">
+			<HintPath>$(SPTPath)\SPT_Runtime\user\mods\Solarint-SAIN-ServerMod\SAINServerMod.dll</HintPath>
+		</Reference>
+		<Reference Include="WTT-ContentBackport" Private="false">
+			<HintPath>$(SPTPath)\SPT_Runtime\user\mods\WTT-ContentBackport\WTT-ContentBackport.dll</HintPath>
+		</Reference>
+		<Reference Include="WTT-Artem" Private="false">
+			<HintPath>$(SPTPath)\SPT_Runtime\user\mods\WTT-Artem\WTT-Artem.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<Target Name="BuildPackage" AfterTargets="Build">
+		<RemoveDir Directories="$(PackageRoot)" />
+		<MakeDir Directories="$(PackageRoot)" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackageRoot)" />
+		<Copy SourceFiles="@(ModResource)" DestinationFiles="@(ModResource->'$(PackageRoot)\%(RecursiveDir)%(Filename)%(Extension)')" />
+	</Target>
+</Project>
+
+
+	
+
+	
+
+	

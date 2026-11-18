@@ -1,0 +1,33 @@
+{
+  "type": "bossDevil",
+  "presetBatch": 1,
+  "isBoss": true,
+  "mustHaveUniqueName": false,
+  "itemSpawnLimits": {},
+  "durability": {
+    "armor": {
+      "maxDelta": 0,
+      "minDelta": 0,
+      "minLimitPercent": 100,
+      "lowestMaxPercent": 100,
+      "highestMaxPercent": 100
+    },
+    "weapon": {
+      "highestMax": 100,
+      "lowestMax": 100,
+      "maxDelta": 0,
+      "minDelta": 0,
+      "minLimitPercent": 100
+    }
+  },
+  "equipment": {
+    "faceShieldIsActiveChancePercent": 100,
+    "forceOnlyArmoredRigWhenNoArmor": true,
+    "forceStock": true,
+    "laserIsActiveChancePercent": 0,
+    "lightIsActiveDayChancePercent": 0,
+    "lightIsActiveNightChancePercent": 0,
+    "nvgIsActiveChanceDayPercent": 0,
+    "nvgIsActiveChanceNightPercent": 100
+  }
+}

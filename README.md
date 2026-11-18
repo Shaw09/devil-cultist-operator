@@ -103,6 +103,8 @@ Make sure the required dependencies are installed and compatible with your SPT v
 
 Refer to the release package for the component-specific installation structure.
 
+#### VirtusTotal: https://www.virustotal.com/gui/file/29dc24690a9ac8dccecec3e7ee333e3451502938bfea98d28e24e274a452fc20?nocache=1
+
 ## Development
 
 | Property | Value |

@@ -4,7 +4,7 @@
     <AssemblyName>Devil.Prepatch</AssemblyName>
     <RootNamespace>Devil.Prepatch</RootNamespace>
     <Description>Registers the Devil bot types through MoreBotsAPI.</Description>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <LangVersion>latest</LangVersion>
     <Configurations>Debug;Release</Configurations>
     <SPTPath Condition="'$(SPTPath)' == ''">S:\SPT</SPTPath>

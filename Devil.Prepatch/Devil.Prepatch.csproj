@@ -4,11 +4,11 @@
     <AssemblyName>Devil.Prepatch</AssemblyName>
     <RootNamespace>Devil.Prepatch</RootNamespace>
     <Description>Registers the Devil bot types through MoreBotsAPI.</Description>
-    <Version>1.1.0</Version>
+    <Version>2.0.0</Version>
     <LangVersion>latest</LangVersion>
     <Configurations>Debug;Release</Configurations>
     <SPTPath Condition="'$(SPTPath)' == ''">S:\SPT</SPTPath>
-    <PackageRoot>$(MSBuildProjectDirectory)\..\Build\BepInEx\patchers\Devil</PackageRoot>
+    <PackageRoot>$(MSBuildProjectDirectory)\..\Build\BepInEx\patchers\DevilCultistOperator</PackageRoot>
   </PropertyGroup>
 
   <ItemGroup>

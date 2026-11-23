@@ -9,7 +9,7 @@ public static class BotTypeRegistrationPatch
     private const int SectantWarriorBrain = 20;
     private const int DevilId = 960234;
 
-    private static readonly List<int> NormalDifficultyOnly =
+    private static readonly List<int> ImpossibleDifficultyOnly =
     [
         0,
         2,
@@ -34,7 +34,7 @@ public static class BotTypeRegistrationPatch
 
         devil.SetCountAsBossForStatistics(true);
         devil.SetShouldUseFenceNoBossAttack(false, false);
-        devil.SetExcludedDifficulties(NormalDifficultyOnly);
+        devil.SetExcludedDifficulties(ImpossibleDifficultyOnly);
         CustomWildSpawnTypeManager.RegisterWildSpawnType(devil, assembly);
     }
 }

@@ -1,4 +1,6 @@
-﻿using SPTarkov.Common.Models.Logging;
+﻿
+using Devil.Server.Controller;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -7,133 +9,270 @@ using SPTarkov.Server.Core.Utils.Json;
 
 namespace Devil.Server;
 
-[Injectable(TypePriority = OnLoadOrder.PostLoad + 100)]
-public sealed class CultistWaves(LocationTable locations, ISptLogger<CultistWaves> logger) : IOnLoad
+[Injectable(
+    InjectionType = InjectionType.Singleton,
+    TypePriority = OnLoadOrder.PostLoad + 100)]
+public sealed class CultistWaves(
+    LocationTable locations,
+    DevilServerConfigService configService,
+    ISptLogger<CultistWaves> logger) : IOnLoad
 {
     private const string Log = "[Devil/Cult]";
     private const string SptIdPrefix = "devil-cult-";
+    private const string HarbingerName = "sectantPredvestnik";
+    private const string EscortType = "sectantWarrior";
 
-    private const double GroupChance = 100;
-
-    private sealed record MapWave(string Map, string Zone, string EscortAmount, bool RandomTime);
+    private sealed record MapWave(
+        string Map,
+        string Zone,
+        int MaxEscort,
+        bool RandomTime
+    );
 
     private static readonly MapWave[] Waves =
     {
-        new("shoreline", "ZoneMeteoStation,ZoneSanatorium1,ZoneSanatorium2,ZoneForestSpawn", "0", false),
-        new("woods", "ZoneScavBase2,ZoneMiniHouse,ZoneBrokenVill,ZoneStoneBunker", "2", false),
-        new("bigmap", "ZoneScavBase,ZoneDormitory", "2", false),
+        new(
+            "shoreline",
+            "ZoneMeteoStation,ZoneSanatorium1,ZoneSanatorium2,ZoneForestSpawn",
+            6,
+            false
+        ),
+        new(
+            "woods",
+            "ZoneScavBase2,ZoneMiniHouse,ZoneBrokenVill,ZoneStoneBunker",
+            4,
+            false
+        ),
+        new(
+            "bigmap",
+            "ZoneScavBase,ZoneDormitory",
+            4,
+            false
+        )
     };
-
-    private static void EnsureSupport(BossLocationSpawn wave, string botType)
-    {
-        var supports = wave.Supports?.ToList() ?? new List<BossSupport>();
-
-        if (supports.Any(s =>
-            string.Equals(s.BossEscortType, botType, StringComparison.OrdinalIgnoreCase)))
-        {
-            return;
-        }
-
-        supports.Add(new BossSupport
-        {
-            BossEscortType = botType,
-            BossEscortDifficulty = new ListOrT<string>(
-                new List<string> { "normal" }, null),
-            BossEscortAmount = "1"
-        });
-
-        wave.Supports = supports;
-    }
 
     public Task OnLoadAsync(CancellationToken cancellationToken)
     {
-        logger.Info($"{Log} CultistWaves OnLoadAsync started.");
+        logger.Info($"{Log} CultistWaves initialized.");
 
-        logger.Info($"{Log} GroupChance = {GroupChance}%.");
-        var added = new List<string>();
+        // Load the shared configuration.
+        var cfg = configService.Initialize();
 
-        foreach (var w in Waves)
-        {
-            try
-            {
-                var spawns = locations.GetLocation(w.Map)?.Base?.BossLocationSpawn;
-                if (spawns == null)
-                {
-                    logger.Warning($"{Log} map '{w.Map}' not found, skipped.");
-                    continue;
-                }
+        // Subscribe to future configuration changes.
+        configService.Changed += OnConfigChanged;
 
-                spawns.RemoveAll(s => s?.SptId == SptIdPrefix + w.Map);
+        ApplyWaves(cfg, "server start");
 
-                var existing = spawns.FirstOrDefault(s => string.Equals(s?.BossName, "sectantPredvestnik", StringComparison.OrdinalIgnoreCase));
-
-                if (existing != null)
-                {
-                    existing.BossChance = GroupChance;
-
-                    existing.Supports ??= new List<BossSupport>();
-
-                    EnsureSupport(existing, "sectantOni");
-                    EnsureSupport(existing, "sectantPrizrak");
-                    EnsureSupport(existing, "bossDevil");
-
-                    logger.Info(
-                        $"{Log} Harbinger diagnostics '{w.Map}': " +
-                        $"Chance={existing.BossChance}, " +
-                        $"Zone={existing.BossZone}, " +
-                        $"EscortAmount={existing.BossEscortAmount}, " +
-                        $"EscortType={existing.BossEscortType}, " +
-                        $"Supports={string.Join(", ", existing.Supports?.Select(s =>
-                            $"{s.BossEscortType} x{s.BossEscortAmount}") ?? Enumerable.Empty<string>())}, " +
-                        $"RandomTime={existing.IsRandomTimeSpawn}, " +
-                        $"Time={existing.Time}, " +
-                        $"ForceSpawn={existing.ForceSpawn}");
-
-                    added.Add(w.Map);
-
-                    continue;
-                }
-
-
-                var newWave = Build(w);
-
-                spawns.Add(newWave);
-                added.Add(w.Map);
-            }
-            catch (Exception ex)
-            {
-                logger.Warning($"{Log} couldn't add the cult to {w.Map}: {ex.Message}");
-            }
-        }
-
-        logger.Info($"{Log} added to {added.Count} map(s): {string.Join(", ", added)} ({GroupChance:0}% chance).");
         return Task.CompletedTask;
     }
 
-    private static BossLocationSpawn Build(MapWave w) => new()
+    private void OnConfigChanged(DevilServerConfig cfg)
     {
-        SptId = SptIdPrefix + w.Map,
-        BossName = "sectantPredvestnik",
-        BossChance = GroupChance,
-        BossDifficulty = "normal",
-        BossEscortAmount = w.EscortAmount,
-        BossEscortDifficulty = "normal",
-        BossEscortType = "exUsec",
-        BossZone = w.Zone,
-        IsBossPlayer = false,
-        IsRandomTimeSpawn = w.RandomTime,
-        Time = -1,
-        Delay = 0,
-        TriggerId = "",
-        TriggerName = "",
-        ForceSpawn = false,
-        IgnoreMaxBots = true,
-        SpawnMode = new List<string> { "regular", "pve" },
-        Supports = new List<BossSupport>
+        logger.Info($"{Log} Configuration changed. Rebuilding waves.");
+
+        ApplyWaves(cfg, "config changed");
+    }
+
+    private static double ClampChance(double value)
+    {
+        if (!double.IsFinite(value))
+            return 100;
+
+        return Math.Clamp(value, 0, 100);
+    }
+
+    private static double GetEscortChance(
+    DevilServerConfig cfg,
+    MapWave wave)
+    {
+        foreach (var entry in cfg.CultGangEscortSpawnChance)
         {
-            new() { BossEscortType = "sectantOni",     BossEscortDifficulty = new ListOrT<string>(new List<string> { "normal" }, null), BossEscortAmount = "1" },
-            new() { BossEscortType = "sectantPrizrak", BossEscortDifficulty = new ListOrT<string>(new List<string> { "normal" }, null), BossEscortAmount = "1" },
-            new() { BossEscortType = "bossDevil", BossEscortDifficulty = new ListOrT<string>(new List<string> { "normal" }, null), BossEscortAmount = "1" }
-        },
+            if (string.Equals(
+                entry.Key,
+                wave.Map,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return ClampChance(entry.Value);
+            }
+        }
+
+        return 100;
+    }
+
+    /// <summary>
+    /// Calculates the number of escorts.
+    /// First rolls the chance of having escorts.
+    /// Then uses a weighted random distribution favoring larger groups.
+    /// </summary>
+    private static int CalculateEscortCount(
+        DevilServerConfig cfg,
+        MapWave wave)
+    {
+        int max = wave.MaxEscort;
+
+        if (max <= 0)
+            return 0;
+
+        double chance = GetEscortChance(cfg, wave);
+
+        // First roll: will the group have escorts?
+        if (Random.Shared.NextDouble() * 100 >= chance)
+            return 0;
+
+        // Second roll: determine the number of escorts.
+        // Higher quantities receive greater weight.
+        int totalWeight = 0;
+
+        for (int i = 1; i <= max; i++)
+            totalWeight += i * i;
+
+        int roll = Random.Shared.Next(totalWeight);
+
+        for (int i = 1; i <= max; i++)
+        {
+            int weight = i * i;
+
+            if (roll < weight)
+                return i;
+
+            roll -= weight;
+        }
+
+        return max;
+    }
+
+    private static BossSupport Support(string type, string amount) => new()
+    {
+        BossEscortType = type,
+        BossEscortDifficulty = new ListOrT<string>(
+            new List<string> { "impossible" },
+            null
+        ),
+        BossEscortAmount = amount
     };
+
+    private static BossLocationSpawn Build(
+        MapWave wave,
+        DevilServerConfig cfg,
+        int escort)
+    {
+        var supports = new List<BossSupport>();
+
+        if (cfg.Oni)
+            supports.Add(Support("sectantOni", "1"));
+
+        if (cfg.Prizrak)
+            supports.Add(Support("sectantPrizrak", "1"));
+
+        if (escort > 0)
+            supports.Add(Support(EscortType, escort.ToString()));
+
+        return new BossLocationSpawn
+        {
+            SptId = SptIdPrefix + wave.Map,
+
+            BossName = HarbingerName,
+            BossChance = ClampChance(cfg.SpawnChanceCultGang),
+            BossDifficulty = "impossible",
+
+            BossEscortAmount = escort.ToString(),
+            BossEscortDifficulty = "impossible",
+            BossEscortType = EscortType,
+
+            BossZone = wave.Zone,
+
+            IsBossPlayer = false,
+            IsRandomTimeSpawn = wave.RandomTime,
+
+            Time = -1,
+            Delay = 0,
+
+            TriggerId = "",
+            TriggerName = "",
+
+            ForceSpawn = false,
+            IgnoreMaxBots = true,
+
+            SpawnMode = new List<string>
+            {
+                "regular",
+                "pve"
+            },
+
+            Supports = supports
+        };
+    }
+
+    private void ApplyWaves(
+        DevilServerConfig cfg,
+        string reason)
+    {
+        lock (DevilServerConfigService.WaveLock)
+        {
+            logger.Info(
+                $"{Log} Applying waves ({reason}). " +
+                $"CultGangChance={cfg.SpawnChanceCultGang}%"
+            );
+
+            var added = new List<string>();
+
+            foreach (var wave in Waves)
+            {
+                try
+                {
+                    var spawns = locations
+                        .GetLocation(wave.Map)?
+                        .Base?
+                        .BossLocationSpawn;
+
+                    if (spawns == null)
+                    {
+                        logger.Warning(
+                            $"{Log} Map '{wave.Map}' not found."
+                        );
+                        continue;
+                    }
+
+                    // Remove previous Devil Cult Gang waves.
+                    int removed = spawns.RemoveAll(s =>
+                        s != null &&
+                        s.SptId == SptIdPrefix + wave.Map
+                    );
+
+                    if (removed > 0)
+                    {
+                        logger.Info(
+                            $"{Log} '{wave.Map}': removed {removed} previous wave(s)."
+                        );
+                    }
+
+                    int escort = CalculateEscortCount(cfg, wave);
+
+                    var newWave = Build(wave, cfg, escort);
+
+                    spawns.Add(newWave);
+                    added.Add(wave.Map);
+
+                    logger.Info(
+                        $"{Log} '{wave.Map}': wave created. " +
+                        $"Chance={newWave.BossChance}%, " +
+                        $"EscortChance={GetEscortChance(cfg, wave)}%, " +
+                        $"EscortCount={escort}/{wave.MaxEscort}, " +
+                        $"Oni={cfg.Oni}, Prizrak={cfg.Prizrak}"
+                    );
+                }
+                catch (Exception ex)
+                {
+                    logger.Warning(
+                        $"{Log} Failed to create wave on '{wave.Map}': {ex.Message}"
+                    );
+                }
+            }
+
+            logger.Info(
+                $"{Log} Waves applied to {added.Count} maps: " +
+                string.Join(", ", added)
+            );
+        }
+    }
 }

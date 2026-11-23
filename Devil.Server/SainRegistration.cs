@@ -18,7 +18,7 @@ public sealed class SainRegistration(SainInteropRegistration sainInterop) : IOnL
             Section = "Cultist Operator",
             Description = "Former Navy SEAL turned cult operator. Silent, patient and lethal: advances tactically, " +
               "and opens engagements with stun, smoke and fragmentation grenades.",
-            DifficultyModifier = 0.95f,
+            DifficultyModifier = 1.0f,
             BrainsToApply = ["SectantWarrior", "PMC", "ExUsec"],
             LayersToRemove = ["Request", "KnightFight", "PmcBear", "PmcUsec", "ExURequest", "StationaryWS"]
         });

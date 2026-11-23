@@ -4,7 +4,7 @@ namespace Devil.Server
 {
     public static class DevilLogger
     {
-        private static MoreBotsLogger _logger;
+        private static MoreBotsLogger? _logger;
 
         public static void Initialize(MoreBotsLogger logger)
         {

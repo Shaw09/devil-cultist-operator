@@ -1,0 +1,23 @@
+{
+  "SpawnChanceDevil": 20,
+  "DevilHarbingerBonusChance": 20,
+  "SpawnChanceCultGang": 20,
+
+  "Oni": true,
+  "Prizrak": true,
+
+  "CultGangEscortSpawnChance": {
+    "woods": 100,
+    "bigmap": 70,
+    "shoreline": 100
+  },
+
+  "DevilEscortSpawnChance": {
+    "woods": 20,
+    "bigmap": 50,
+    "shoreline": 70,
+    "rezervbase": 50,
+    "tarkovstreets": 100,
+    "lighthouse": 80
+  }
+}

@@ -73,6 +73,26 @@ public sealed class CultistWaves(
         ApplyWaves(cfg, "config changed");
     }
 
+    /// <summary>True for the Cult Gang (Harbinger) waves this mod adds.</summary>
+    public static bool IsCultWave(BossLocationSpawn? spawn) =>
+        spawn?.SptId != null && spawn.SptId.StartsWith(SptIdPrefix, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Builds a fresh Cult Gang wave for one map (new escort roll), or null if the map has no Cult Gang wave.
+    /// Used by <see cref="RaidWaveGuardPatch"/>.
+    /// </summary>
+    public BossLocationSpawn? CreateWaveForMap(string map)
+    {
+        var wave = Waves.FirstOrDefault(w => string.Equals(w.Map, map, StringComparison.OrdinalIgnoreCase));
+        if (wave == null)
+        {
+            return null;
+        }
+
+        var cfg = configService.Current;
+        return Build(wave, cfg, CalculateEscortCount(cfg, wave));
+    }
+
     private static double ClampChance(double value)
     {
         if (!double.IsFinite(value))

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
@@ -28,7 +27,7 @@ namespace Devil.Client
 
         public const string PluginGuid = "spt.shaw.devil.client";
         public const string PluginName = "Devil Cultist Operator";
-        public const string PluginVersion = "2.0.0";
+        public const string PluginVersion = "2.0.1";
 
         public static ManualLogSource Log { get; private set; }
 

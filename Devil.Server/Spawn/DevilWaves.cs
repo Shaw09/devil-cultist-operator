@@ -121,6 +121,32 @@ public sealed class DevilWaves(
         }
     }
 
+    /// <summary>True for the boss wave this mod adds.</summary>
+    public static bool IsDevilWave(BossLocationSpawn? spawn) => spawn?.SptId == SptId;
+
+    /// <summary>
+    /// Builds a fresh Devil wave for one map (new escort roll), or null if the map has no Devil wave.
+    /// Used by <see cref="RaidWaveGuardPatch"/> when another mod (e.g. ABPS) rebuilt BossLocationSpawn
+    /// and dropped the wave added at server start.
+    /// </summary>
+    public BossLocationSpawn? CreateWaveForMap(string map, LocationBase location)
+    {
+        var wave = Waves.FirstOrDefault(w => string.Equals(w.Map, map, StringComparison.OrdinalIgnoreCase));
+        if (wave == null)
+        {
+            return null;
+        }
+
+        var zone = CleanZones(wave.Zone) ?? Zones(location);
+        if (string.IsNullOrEmpty(zone))
+        {
+            return null;
+        }
+
+        int escortCount = CalculateEscortCount(configService.Current, wave, out _);
+        return Build(zone, escortCount.ToString());
+    }
+
     private static int CalculateEscortCount(
         DevilServerConfig config,
         MapWave wave,
